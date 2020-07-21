@@ -1,0 +1,96 @@
+※每天取得認證後須在規定時間內(2:00~5:00)測試才會正常授權
+※不要設定參數驗證管理
+※真的有問題無法排除的話打給財金公司工程部門會比打給第一銀行還要快得到解答
+
+【必須資料】
+1.網路特店測試環境申請表
+2.財金測試卡號
+3.網路特店帳務管理手冊_V2.9
+
+【使用說明】
+每24小時需到下列網址取得一次認證
+
+- 測試套帳務後台登入網址
+    https://www.focas-test.fisc.com.tw/FOCAS_Web/web/signin/merchant/
+- 營運套帳務後台登入網址
+    https://www.focas.fisc.com.tw/FOCAS_Web/web/signin/merchant/
+
+
+特店代號MerchantID & 登入帳號 & 密碼  網路特店測試環境申請表中可找到
+
+登入即代表已開通此MerchantID授權
+24小時後若須測試須再次取得
+
+在處理信用卡結帳的 Countroller 中加入下列程式碼
+
+/* start */
+
+//測試為0,正式為1
+if($mode == 0) {
+    $action = "https://www.focas-test.fisc.com.tw/FOCAS_WEBPOS/online/";
+} elseif($mode == 1) {
+    $action = "https://www.focas.fisc.com.tw/FOCAS_WEBPOS/online/";
+}
+$info .= '<form id=firstbank method=post action="'.$action.'">';
+$info .= '<input type=hidden name=MerchantID value='.$this->merchantID.'>';
+$info .= '<input type=hidden name=TerminalID value='.$this->terminalID.'>';
+$info .= '<input type=hidden name=merID value='.$this->merID.'>';
+$info .= '<input type=hidden name=MerchantName value='.$this->merchantName.'>';
+$info .= '<input type=hidden name=purchAmt value='.$this->purchAmt.'>';
+$info .= '<input type=hidden name=lidm value='.$this->lidm.'>';
+$info .= '<input type=hidden name=AuthResURL value='.$this->authResURL.'>';
+$info .= '</form>';
+$info .='<script  src="'.base_url("/js/templates/jquery-1.9.1.js").'"></script>';
+$info .='<script>';
+$info .='$(function() {$("#firstbank").submit();});';
+$info .='</script>';
+echo $info;
+
+/* end */
+
+MerchantID 特店代號  (特店代碼)
+TerminalID 機台代號 (端末機代號)
+merID  特店網站之代碼 (特店編號)
+MerchantName 特店網站或公司名稱 (選填)
+purchAmt 授權總金額
+lidm 訂單編號
+AuthResURL 回傳授權結果網址 (選填)
+
+※務必檢查jquery-1.9.1.js 檔案位置是否正確
+相關參數說明可在 網路特店帳務管理手冊_V2.9 -> 輸入欄位 中找到
+
+將資料POST過去之後應出現輸入卡號頁面
+若出現錯誤請檢查上方form中是否有值錯誤
+若錯誤經查詢錯誤代碼一覽表後為 未經授權使用的MerchantID 請看註1
+若錯誤為交易資料驗證結果有誤! 請看註2
+
+其他錯誤可取消傳送 AuthResURL 此參數
+善用預設頁面出現的 status,error code,errDesc 三個參數查表排除
+
+
+※註1
+未經授權使用的MerchantID
+有兩種可能
+1.未取得認證
+每24小時需到下列網址取得一次認證
+
+- 測試套帳務後台登入網址
+    https://www.focas-test.fisc.com.tw/FOCAS_Web/web/signin/merchant/
+- 營運套帳務後台登入網址
+    https://www.focas.fisc.com.tw/FOCAS_Web/web/signin/merchant/
+
+2.未在規定時間內測試
+財金公司部分開放第一銀行刷卡測試環境為工作日下午2:00~5:00
+若在此時段外測試皆為未經授權使用的MerchantID
+
+※註2
+此問題需請財金公司部分幫忙排除
+
+- 測試套帳務後台登入網址
+    https://www.focas-test.fisc.com.tw/FOCAS_Web/web/signin/merchant/
+- 營運套帳務後台登入網址
+    https://www.focas.fisc.com.tw/FOCAS_Web/web/signin/merchant/
+
+進入後 特店管理區->安全性作業管理->參數驗證管理
+此區不要做任何的設定 否則會出現此問題
+若發生此問題請打電話聯絡財金公司工程部門幫忙移除參數
